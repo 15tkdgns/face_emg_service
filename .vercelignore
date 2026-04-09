@@ -1,0 +1,9 @@
+# 미사용 원본 FP32 모델 제외 (quantized _q.onnx 만 배포)
+models/densenet121.onnx
+models/densenet121_new.onnx
+models/densenet121_clahe_edge.onnx
+models/efficientnet_b0.onnx
+models/efficientnet_b0_clahe_edge.onnx
+
+# 양자화 스크립트
+scripts/
