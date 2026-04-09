@@ -18,7 +18,10 @@ BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS_DIR = os.path.join(BASE_DIR, 'models')
 
 EMOTIONS      = ['기쁨', '당황', '분노', '상처']
-EMOTION_EMOJI = {'기쁨': '😄', '당황': '😳', '분노': '😡', '상처': '😢'}
+EMOTION_EMOJI = {
+    '기쁨': '😄', '당황': '😳', '분노': '😡', '상처': '😢',
+    '불안': '😰', '슬픔': '😢', '중립': '😐',
+}
 MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 STD  = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 
@@ -56,7 +59,7 @@ def detect_and_crop(img_bytes: bytes):
     face.save(buf, format='JPEG', quality=85)
     face_b64 = base64.b64encode(buf.getvalue()).decode('utf-8')
 
-    return None, np.array(face, dtype=np.uint8), face_b64
+    return False, np.array(face, dtype=np.uint8), face_b64
 
 
 def _preprocess(face_rgb: np.ndarray) -> np.ndarray:
