@@ -17,10 +17,12 @@ logger = logging.getLogger(__name__)
 BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS_DIR = os.path.join(BASE_DIR, 'models')
 
-EMOTIONS      = ['기쁨', '당황', '분노', '상처']
+EMOTIONS_4 = ['기쁨', '당황', '분노', '상처']
+EMOTIONS_7 = ['기쁨', '당황', '분노', '불안', '상처', '슬픔', '중립']
+EMOTIONS   = EMOTIONS_4  # 기본값 (하위 호환)
 EMOTION_EMOJI = {
     '기쁨': '😄', '당황': '😳', '분노': '😡', '상처': '😢',
-    '불안': '😰', '슬픔': '😢', '중립': '😐',
+    '불안': '😰', '슬픔': '😥', '중립': '😐',
 }
 MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 STD  = np.array([0.229, 0.224, 0.225], dtype=np.float32)
@@ -42,7 +44,16 @@ MODEL_REGISTRY = {
         'color':       '#57B894',
         'val_acc':     0.8376,
         'f1_per':      {},
-        'emotions':    ['기쁨', '당황', '분노', '상처'],
+        'emotions':    EMOTIONS_4,
+    },
+    'han_yooseung': {
+        'label':       'DenseNet121 · 한유승',
+        'description': 'Focal Loss · 7클래스 (87.6%)',
+        'onnx':        'han_yooseung.onnx',
+        'color':       '#a78bfa',
+        'val_acc':     0.8762,
+        'f1_per':      {},
+        'emotions':    EMOTIONS_7,
     },
 }
 
@@ -106,7 +117,8 @@ class ModelManager:
                 'label':       info['label'],
                 'description': info['description'],
                 'color':       info['color'],
-                'loaded':      os.path.isfile(os.path.join(MODELS_DIR, info['onnx'])),
+                'loaded':      mid in self._sessions,
+                'file_exists': os.path.isfile(os.path.join(MODELS_DIR, info['onnx'])),
                 'val_acc':     info['val_acc'],
                 'f1_per':      info['f1_per'],
             }

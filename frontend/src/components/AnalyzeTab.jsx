@@ -1,15 +1,19 @@
 import { useRef, useState, useCallback } from 'react'
 import { api } from '../api'
 
-const EMOTIONS = ['기쁨', '당황', '분노', '상처']
-const EMOTION_EMOJI = { 기쁨: '😄', 당황: '😳', 분노: '😡', 상처: '😢' }
-const EMOTION_COLOR = { 기쁨: '#f59e0b', 당황: '#f97316', 분노: '#ef4444', 상처: '#6366f1' }
+const EMOTION_EMOJI = {
+  기쁨: '😄', 당황: '😳', 분노: '😡', 상처: '😢',
+  불안: '😰', 슬픔: '😥', 중립: '😐',
+}
+const EMOTION_COLOR = {
+  기쁨: '#f59e0b', 당황: '#f97316', 분노: '#ef4444', 상처: '#6366f1',
+  불안: '#8b5cf6', 슬픔: '#3b82f6', 중립: '#6b7280',
+}
 
 const MODELS = [
-  { id: 'densenet121',             label: 'DenseNet121',             color: '#4F86C6' },
-  { id: 'densenet121_clahe_edge',  label: 'DenseNet121+CLAHE+Edge', color: '#57B894' },
-  { id: 'efficientnet_b0',         label: 'EfficientNet-B0',         color: '#F4845F' },
-  { id: 'efficientnet_b0_clahe_edge', label: 'EfficientNet+CLAHE+Edge', color: '#9b59b6' },
+  { id: 'densenet121',     label: 'DenseNet121 (기본)',    color: '#4F86C6', desc: '87.6% · Best 모델 · 4클래스' },
+  { id: 'densenet121_new', label: 'DenseNet121 (재학습)',  color: '#57B894', desc: '83.8% · 새 데이터 · 4클래스' },
+  { id: 'han_yooseung',   label: 'DenseNet121 · 한유승', color: '#a78bfa', desc: '87.6% · Focal Loss · 7클래스' },
 ]
 
 // ── 신뢰도 바 ─────────────────────────────────────────────────────────────────
@@ -32,7 +36,8 @@ function ConfidenceBar({ emotion, score, highlight }) {
 // ── 단일 모델 결과 ─────────────────────────────────────────────────────────────
 function SingleResult({ result }) {
   const { emotion, emoji, confidence, scores } = result
-  const color = EMOTION_COLOR[emotion] || '#6366f1'
+  const color    = EMOTION_COLOR[emotion] || '#6366f1'
+  const emotions = Object.keys(scores)  // 모델별 동적 클래스 리스트
   return (
     <div className="slide-up">
       <div style={{ textAlign: 'center', padding: '20px 0 16px' }}>
@@ -43,7 +48,7 @@ function SingleResult({ result }) {
         </div>
       </div>
       <div style={{ padding: '0 16px 16px' }}>
-        {EMOTIONS.map(e => (
+        {emotions.map(e => (
           <ConfidenceBar key={e} emotion={e} score={scores[e] ?? 0} highlight={e === emotion} />
         ))}
       </div>
@@ -58,25 +63,28 @@ function CompareResult({ results }) {
       <p style={{ fontSize: 12, color: '#71717a', marginBottom: 12 }}>
         {results.length}개 모델 동시 분석
       </p>
-      {results.map(r => (
-        <div key={r.model_id} className="compare-card">
-          <div className="compare-card-header">
-            <div className="model-dot" style={{ background: r.color }} />
-            <span className="compare-card-title">{r.model_label}</span>
-            <span style={{ fontSize: 12, color: '#71717a' }}>{r.infer_ms}ms</span>
+      {results.map(r => {
+        const emotions = Object.keys(r.scores)  // 모델별 동적
+        return (
+          <div key={r.model_id} className="compare-card">
+            <div className="compare-card-header">
+              <div className="model-dot" style={{ background: r.color }} />
+              <span className="compare-card-title">{r.model_label}</span>
+              <span style={{ fontSize: 12, color: '#71717a' }}>{r.infer_ms}ms</span>
+            </div>
+            <div className="compare-card-top-emotion">
+              <span>{r.emoji}</span>
+              <span style={{ color: EMOTION_COLOR[r.emotion] }}>{r.emotion}</span>
+              <span style={{ fontSize: 14, color: '#71717a', fontWeight: 500 }}>
+                {(r.confidence * 100).toFixed(1)}%
+              </span>
+            </div>
+            {emotions.map(e => (
+              <ConfidenceBar key={e} emotion={e} score={r.scores[e] ?? 0} highlight={e === r.emotion} />
+            ))}
           </div>
-          <div className="compare-card-top-emotion">
-            <span>{r.emoji}</span>
-            <span style={{ color: EMOTION_COLOR[r.emotion] }}>{r.emotion}</span>
-            <span style={{ fontSize: 14, color: '#71717a', fontWeight: 500 }}>
-              {(r.confidence * 100).toFixed(1)}%
-            </span>
-          </div>
-          {EMOTIONS.map(e => (
-            <ConfidenceBar key={e} emotion={e} score={r.scores[e] ?? 0} highlight={e === r.emotion} />
-          ))}
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -281,7 +289,7 @@ export default function AnalyzeTab() {
             }}
           >
             {MODELS.map(m => (
-              <option key={m.id} value={m.id}>{m.label}</option>
+              <option key={m.id} value={m.id}>{m.label} — {m.desc}</option>
             ))}
           </select>
         )}
