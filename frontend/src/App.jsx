@@ -2,6 +2,7 @@ import { useState } from 'react'
 import AnalyzeTab    from './components/AnalyzeTab'
 import ModelCompareTab from './components/ModelCompareTab'
 import PipelineTab   from './components/PipelineTab'
+import LiveTab       from './components/LiveTab'
 
 const TABS = [
   {
@@ -10,6 +11,15 @@ const TABS = [
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'live',
+    label: '실시간',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M15 10l4.553-2.069A1 1 0 0 1 21 8.873v6.254a1 1 0 0 1-1.447.892L15 14"/><rect x="2" y="6" width="13" height="12" rx="2"/>
       </svg>
     ),
   },
@@ -37,6 +47,7 @@ const TABS = [
 
 const TAB_LABELS = {
   analyze:  '감정인식 AI',
+  live:     '실시간 감정 분석',
   models:   '모델 성능 비교',
   pipeline: '파이프라인 시각화',
 }
@@ -52,6 +63,7 @@ export default function App() {
 
       <main className="app-content">
         {tab === 'analyze'   && <AnalyzeTab />}
+        {tab === 'live'      && <LiveTab />}
         {tab === 'models'    && <ModelCompareTab />}
         {tab === 'pipeline'  && <PipelineTab />}
       </main>
